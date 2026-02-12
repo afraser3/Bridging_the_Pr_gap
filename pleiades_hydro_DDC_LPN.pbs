@@ -1,0 +1,31 @@
+#PBS -S /bin/bash
+#PBS -N DDC_BPrG_LPN
+#PBS -l select=32:ncpus=128:mpiprocs=128:model=rom_ait
+#PBS -l walltime=24:00:00
+#PBS -j oe
+#PBS -q long
+#PBS -W group_list=s2328
+
+export dedalus_script=hydro_DDC_IVP_LPN
+export cfg_file=eps300_Sc2_vvhres
+
+cd $PBS_O_WORKDIR
+
+source ~/miniforge3/bin/activate
+conda activate dedalus-d2
+
+date
+mpiexec_mpt -n 4096 python3 $dedalus_script.py config_files/hydro_LPN/$cfg_file.cfg 2> $cfg_file.err.$PBS_JOBID > $cfg_file.out.$PBS_JOBID
+date
+cd runs/hydro_LPN/$cfg_file
+mpiexec_mpt -n 4096 python3 ../../../merge_tasks.py
+
+mpiexec_mpt -n 128 python3 ../../../plot_xz_slices_hydro.py --col_inch=2 --row_inch=4
+png2mp4 "snapshots_xz/snapshots_xz*.png" snapshots_xz.mp4 30
+rm snapshots_xz/*.png
+
+mpiexec_mpt -n 128 python3 ../../../plot_xy_slices_hydro.py --col_inch=4 --row_inch=2
+png2mp4 "snapshots_xy/snapshots_xy*.png" snapshots_xy.mp4 30
+rm snapshots_xz/*.png
+
+date
