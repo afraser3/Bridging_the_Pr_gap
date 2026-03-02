@@ -5,11 +5,13 @@ from configparser import ConfigParser
 from pathlib import Path
 from matplotlib import pyplot as plt
 import matplotlib.lines as mlines
+plt.style.use('style_file.mplstyle')
 
 
 def eval_finger(R0, Pr, tau, rescale=False):
     # Evaluate the growth rate and horizontal wavenumber of fastest-growing
-    # elevator mode. This uses the fingering-mode notes developed by Rich Townsend
+    # elevator mode. This is a slight modification to some very helpful code
+    # originally written by Rich Townsend
 
     a3 = Pr * (1 - R0) + tau - R0
     a2 = -2 * (R0 - 1) * (Pr + tau + Pr * tau)
@@ -34,7 +36,8 @@ def eval_finger(R0, Pr, tau, rescale=False):
 
 def eval_finger_LPN(Ra, Sc):
     # Evaluate the growth rate and horizontal wavenumber of fastest-growing
-    # elevator mode. This uses the fingering-mode notes developed by Rich Townsend
+    # elevator mode. This is a slight modification to some very helpful code
+    # originally written by Rich Townsend
 
     a3 = 1
     a2 = 2*Sc + 2
@@ -200,6 +203,7 @@ run_names3.remove('eps100_tau5e-7_Pr1e-6_hres')
 # run_names3.remove('eps1e3_tau5e-7_Pr1e-6_vvhres')
 run_names3.remove('eps300_tau5e-7_Pr1e-6_vvhres')
 run_names3.remove('eps300_tau5e-7_Pr1e-6_vvhresx1p5')
+run_names3.remove('eps300_tau5e-7_Pr1e-6_vvhresx1p5_repeat')
 #
 run_names3.remove('eps1_tau5e-7_Pr1e-6_no-rs_lin')
 run_names3.remove('eps1_tau5e-7_Pr1e-6_with-rs')
@@ -213,6 +217,7 @@ run_names3.remove('eps0p1_tau5e-7_Pr1e-6_2')
 run_names3.remove('eps10_tau5e-7_Pr1e-6_hres')
 run_names4 = [Path(fpath).stem for fpath in glob.glob('runs/*tau5e-3*')]
 run_names_LPN = [Path(fpath).stem for fpath in glob.glob('runs/hydro_LPN/eps*')]
+print(run_names_LPN)
 
 plot_both_panels = True
 
@@ -323,6 +328,7 @@ data3 = data3[sortind3, :]
 sortind4 = np.argsort(data4[:,0])
 data4 = data4[sortind4, :]
 sortind_LPN = np.argsort(data_LPN[:,0])
+# print(data_LPN[:,0])
 data_LPN = data_LPN[sortind_LPN, :]
 
 xaxis_ind = 1  # for r
@@ -330,7 +336,7 @@ xaxis_ind = 1  # for r
 # yaxis_LPN_ind = 2  # for wrms
 yaxis_ind = 7  # for FC
 yaxis_LPN_ind = 4  # for FC
-scale = 0.6
+scale = 0.875
 if plot_both_panels:
     data_labels = [r'$\mathrm{Pr} = 10^{-1}$', r'$\mathrm{Pr} = 10^{-2}$',
                    r'$\mathrm{Pr} = 10^{-3}$', r'$\mathrm{Pr} = 10^{-6}$']
@@ -368,7 +374,7 @@ if plot_both_panels:
     second_legend = plt.legend(handles=[DNS_dummy, BGS13_dummy], loc='upper left')
 
     # plt.ylabel(r'$\hat{w}_\mathrm{rms}/\tau$')
-    plt.ylabel(r'$\tilde{F}_C$')
+    plt.ylabel(r'$|\tilde{F}_C|$')
     # plt.ylabel(r'$\hat{D}_C/(R_0 \tau^2)$')
     plt.xlabel(r'reduced density ratio $r$')
     # plt.xlabel(r'$(R_0 \tau)^{-1} - 1$')
@@ -379,8 +385,11 @@ if plot_both_panels:
     # plt.ylim((1e-1, 3e2))
     # plt.ylim((2e-1, 3e2))
     plt.ylim((1e-1, 3e6))
+    plt.gca().tick_params(axis='x', pad=6)
+    plt.title(r'(a)', loc='left', pad=8)
 
     plt.subplot(1, 2, 2)
+    plt.gca().tick_params(axis='x', pad=6)
     data_labels = ['', '', '']
     BGS13_labels = ['', '', '']
 else:
@@ -401,22 +410,22 @@ plt.gca().set_yscale('log')
 
 rescale_exp = 0
 
-plt.plot(epsilon_scan, FC_BGS13_LPN_scan(epsilon_scan, 2)/epsilon_scan**rescale_exp, '-', c='k', linewidth=3)#, label=r'$\mathrm{Pr} \to 0$ BGS13')
-plt.plot(data_LPN[:, 0], data_LPN[:, yaxis_LPN_ind]/data_LPN[:, 0]**rescale_exp, 'o', c='k', label=r'$\tau \to 0$')
+plt.plot(epsilon_scan, FC_BGS13_LPN_scan(epsilon_scan, 2)/(epsilon_scan+1)**rescale_exp, '-', c='k', linewidth=3)#, label=r'$\mathrm{Pr} \to 0$ BGS13')
+plt.plot(data_LPN[:, 0], data_LPN[:, yaxis_LPN_ind]/(data_LPN[:, 0]+1)**rescale_exp, 'o', c='k', label=r'$\tau \to 0$')
 # plt.plot(data_LPN[:, 0], 15*data_LPN[:, 0]**1.25, '--', c='k')
 # plt.plot(data_LPN[:, 0], 2*data_LPN[:, 0], '--', c='red')
 
-plt.plot(data1[:, xaxis_ind], data1[:, yaxis_ind]/data1[:, xaxis_ind]**rescale_exp, '.', c='C0', label=data_labels[0])#, label=r'$\mathrm{Pr} = 10^{-1}$ DNS')
-plt.plot(data4[:, xaxis_ind], data4[:, yaxis_ind]/data4[:, xaxis_ind]**rescale_exp, '^', c='C4')#, label=r'$\mathrm{Pr} = 10^{-2}$ DNS')
-plt.plot(data2[:, xaxis_ind], data2[:, yaxis_ind]/data2[:, xaxis_ind]**rescale_exp, 'x', c='C1', label=data_labels[1])#, label=r'$\mathrm{Pr} = 10^{-3}$ DNS')
-plt.plot(data3[:, xaxis_ind], data3[:, yaxis_ind]/data3[:, xaxis_ind]**rescale_exp, '+', c='C2', label=data_labels[2])#, label=r'$\mathrm{Pr} = 10^{-6}$ DNS')
+plt.plot(data1[:, xaxis_ind], data1[:, yaxis_ind]/(data1[:, xaxis_ind]+1)**rescale_exp, '.', c='C0', label=data_labels[0])#, label=r'$\mathrm{Pr} = 10^{-1}$ DNS')
+plt.plot(data4[:, xaxis_ind], data4[:, yaxis_ind]/(data4[:, xaxis_ind]+1)**rescale_exp, '^', c='C4')#, label=r'$\mathrm{Pr} = 10^{-2}$ DNS')
+plt.plot(data2[:, xaxis_ind], data2[:, yaxis_ind]/(data2[:, xaxis_ind]+1)**rescale_exp, 'x', c='C1', label=data_labels[1])#, label=r'$\mathrm{Pr} = 10^{-3}$ DNS')
+plt.plot(data3[:, xaxis_ind], data3[:, yaxis_ind]/(data3[:, xaxis_ind]+1)**rescale_exp, '+', c='C2', label=data_labels[2])#, label=r'$\mathrm{Pr} = 10^{-6}$ DNS')
 
 # plt.plot(data_LPN[:, 0], data_LPN[:, 3]/data_LPN[:, 0]**rescale_exp, '-', c='k', label=r'$\mathrm{Pr} \to 0$ BGS13')
 
-plt.plot(epsilon_from_r(r_scan, 5e-2), FC_BGS13_scan(r_scan, 1e-1, 5e-2)/epsilon_from_r(r_scan, 5e-2)**rescale_exp, c='C0', label=BGS13_labels[0])#, label=r'$\mathrm{Pr} = 10^{-1}$ BGS13')
-plt.plot(epsilon_from_r(r_scan, 5e-3), FC_BGS13_scan(r_scan, 1e-2, 5e-3)/epsilon_from_r(r_scan, 5e-3)**rescale_exp, c='C4')#, label=r'$\mathrm{Pr} = 10^{-2}$ BGS13')
-plt.plot(epsilon_from_r(r_scan, 5e-4), FC_BGS13_scan(r_scan, 1e-3, 5e-4)/epsilon_from_r(r_scan, 5e-4)**rescale_exp, '--', c='C1', label=BGS13_labels[1])#, label=r'$\mathrm{Pr} = 10^{-3}$ BGS13')
-plt.plot(epsilon_from_r(r_scan, 5e-7), FC_BGS13_scan(r_scan, 1e-6, 5e-7)/epsilon_from_r(r_scan, 5e-7)**rescale_exp, ':', c='C2', label=BGS13_labels[2])#, label=r'$\mathrm{Pr} = 10^{-6}$ BGS13')
+plt.plot(epsilon_from_r(r_scan, 5e-2), FC_BGS13_scan(r_scan, 1e-1, 5e-2)/(epsilon_from_r(r_scan, 5e-2)+1)**rescale_exp, c='C0', label=BGS13_labels[0])#, label=r'$\mathrm{Pr} = 10^{-1}$ BGS13')
+plt.plot(epsilon_from_r(r_scan, 5e-3), FC_BGS13_scan(r_scan, 1e-2, 5e-3)/(epsilon_from_r(r_scan, 5e-3)+1)**rescale_exp, c='C4')#, label=r'$\mathrm{Pr} = 10^{-2}$ BGS13')
+plt.plot(epsilon_from_r(r_scan, 5e-4), FC_BGS13_scan(r_scan, 1e-3, 5e-4)/(epsilon_from_r(r_scan, 5e-4)+1)**rescale_exp, '--', c='C1', label=BGS13_labels[1])#, label=r'$\mathrm{Pr} = 10^{-3}$ BGS13')
+plt.plot(epsilon_from_r(r_scan, 5e-7), FC_BGS13_scan(r_scan, 1e-6, 5e-7)/(epsilon_from_r(r_scan, 5e-7)+1)**rescale_exp, ':', c='C2', label=BGS13_labels[2])#, label=r'$\mathrm{Pr} = 10^{-6}$ BGS13')
 # plt.plot(data1[:, xaxis_ind], data1[:, yaxis_ind + 1]/data1[:, xaxis_ind]**rescale_exp, c='C0', label=r'$\mathrm{Pr} = 10^{-1}$ BGS13')
 # plt.plot(data4[:, xaxis_ind], data4[:, yaxis_ind + 1]/data4[:, xaxis_ind]**rescale_exp, c='C4', label=r'$\mathrm{Pr} = 10^{-2}$ BGS13')
 # plt.plot(data2[:, xaxis_ind], data2[:, yaxis_ind + 1]/data2[:, xaxis_ind]**rescale_exp, c='C1', label=r'$\mathrm{Pr} = 10^{-3}$ BGS13')
@@ -428,6 +437,8 @@ plt.xlim((1e-1, 1e3))
 # plt.ylim((1e-1, 3e2))
 # plt.ylim((2e-1, 3e2))
 plt.ylim((1e-1, 3e6))
+if plot_both_panels:
+    plt.title(r'(b)', loc='left', pad=8)
 # first_legend = plt.legend(ncol=1, loc='lower right')
 # plt.gca().add_artist(first_legend)
 
@@ -441,20 +452,20 @@ plt.ylim((1e-1, 3e6))
 # axs[0,0].legend(handles = [Full_pts, IFSC_pts, IpFSC_pts], loc = 'upper left')
 
 
-# plt.axvline(epsilon_from_r(0, 0.05), c='C0')
-# plt.axvline(epsilon_from_r(0, 5e-3), c='C4')
-# plt.axvline(epsilon_from_r(0, 5e-4), c='C1')
-# plt.axvline(epsilon_from_r(0, 5e-7), c='C2')
+plt.axvline(epsilon_from_r(0, 0.05), c='C0')
+plt.axvline(epsilon_from_r(0, 5e-3), c='C4')
+plt.axvline(epsilon_from_r(0, 5e-4), c='C1')
+plt.axvline(epsilon_from_r(0, 5e-7), c='C2')
 # plt.gca().invert_xaxis()
 # plt.plot(data3[-4:, xaxis_ind], 5*data3[-4:, xaxis_ind]**(5/4), '--', c='k')
 # plt.legend(ncol=2)
 # plt.ylabel(r'$\hat{w}_\mathrm{rms}/\tau$')
 # plt.xlabel(r'reduced density ratio $r$')
 # plt.xlabel(r'supercriticality $(R_0 \tau)^{-1} - 1$')
-plt.xlabel(r'supercriticality $\varepsilon = \mathcal{R} - 1 = (R_0 \tau)^{-1} - 1$', fontsize='large')
+plt.xlabel(r'supercriticality $\varepsilon = \mathcal{R} - 1$', fontsize='large')
 # plt.gca().set_yticks([])
 plt.gca().yaxis.set_tick_params(which='both', labelleft=False)
 
-plt.tight_layout()
-# plt.savefig('BGS13_verification_wrms_TAMU.pdf', bbox_inches='tight')
-plt.show()
+# plt.tight_layout()
+plt.savefig('figures/BGS13_verification.pdf', bbox_inches='tight')
+# plt.show()
