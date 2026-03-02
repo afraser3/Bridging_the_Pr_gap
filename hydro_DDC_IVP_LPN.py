@@ -29,7 +29,8 @@ logger = logging.getLogger(__name__)
 
 def eval_finger_LPN(Ra, Sc):
     # Evaluate the growth rate and horizontal wavenumber of fastest-growing
-    # elevator mode. This uses the fingering-mode notes developed by Rich Townsend
+    # elevator mode. This is a slight modification to some very helpful code
+    # originally written by Rich Townsend
 
     a3 = 1
     a2 = 2*Sc + 2
