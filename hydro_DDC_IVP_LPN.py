@@ -1,7 +1,7 @@
 """
 3D DDC model in Dedalus v2
 
-To run in parallel with 2 processes, e.g., do (from the 'python' directory):
+To run in parallel with 2 processes, e.g., do:
     $ mpiexec -n 2 python3 hydro_DDC_IVP.py config_files/test.cfg
 
 Optionally, you can specify a subdirectory within IVPs that you want it to save to.

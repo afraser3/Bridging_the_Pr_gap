@@ -1,12 +1,20 @@
 """
 3D DDC model in Dedalus v2
 
-To run in parallel with 2 processes, e.g., do (from the 'python' directory):
+To run in parallel with 2 processes, e.g., do:
     $ mpiexec -n 2 python3 hydro_DDC_IVP.py config_files/test.cfg
 
 Optionally, you can specify a subdirectory within IVPs that you want it to save to.
 So, the following will save to runs/subdir/test/ (might have to make sure 'subdir' exists, I forget)
     $ mpiexec -n 2 python3 hydro_DDC_IVP.py config_files/test.cfg subdir
+
+Most of the parameters in the .cfg file are hopefully self-explanatory. But note that:
+- `R0_is_epsilon` and `reduced_r` control whether the entry `R0` is interpreted as the density ratio R0, the reduced
+  density ratio r, or as the supercriticality epsilon = 1/(R0 * tau) - 1
+- kopt_Lscale controls whether the input Lx, Ly, Lz are interpreted in units of d (characteristic finger width) or of
+  2pi/k_opt (the wavelength of the fastest-growing mode of instability).
+- buoyancy_dtmax controls whether or not the max timestep size is set to a fraction (set by bdt_frac) of the buoyancy
+  frequency or not.
 """
 
 import numpy as np
