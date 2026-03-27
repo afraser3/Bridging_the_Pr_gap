@@ -4,11 +4,17 @@
 To run in parallel with 2 processes, e.g., do:
     $ mpiexec -n 2 python3 hydro_DDC_IVP.py config_files/test.cfg
 
-Optionally, you can specify a subdirectory within IVPs that you want it to save to.
+Optionally, you can specify a subdirectory within runs/ that you want it to save outputs to.
 So, the following will save to runs/subdir/test/ (might have to make sure 'subdir' exists, I forget)
     $ mpiexec -n 2 python3 hydro_DDC_IVP.py config_files/test.cfg subdir
 
 Most of the parameters in the .cfg file are hopefully self-explanatory. But note that:
+- `rescale` controls which nondimensionalization to use, with `rescale = True` corresponding to the \tilde{} units as
+  in, e.g., Eqs. 5-8 of the paper, while `rescale = False` corresponds to the "traditional" units adopted in, e.g., most
+  papers by Radko et al and/or Garaud et al (the \hat{} units mentioned in the paragraph below Eq. 8 of the paper). See
+  the last paragraph of Appendix A.1 of the paper for a brief discussion of why one might prefer the \tilde{} units for
+  studying salt fingers at low Pr and tau specifically -- note that I have no idea what units are more suitable for the
+  other branch of DDC, that work is TBD.
 - `R0_is_epsilon` and `reduced_r` control whether the entry `R0` is interpreted as the density ratio R0, the reduced
   density ratio r, or as the supercriticality epsilon = 1/(R0 * tau) - 1
 - kopt_Lscale controls whether the input Lx, Ly, Lz are interpreted in units of d (characteristic finger width) or of
